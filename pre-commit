@@ -1,0 +1,40 @@
+#!/bin/bash
+
+echo "Hi! I'm your pre-commit code checker."
+
+FILE="HW14_OOP.py"
+FILE_FASTQ="run_bseq.py"
+TESTS="${FILE%.py}_test.py"
+
+if [ -f $FILE ]; then
+
+	if [ ! -f hooks_env/bin/activate ]; then
+		echo "For the first time I need to prepare an environment, give me a minute..."
+		python3 -m venv hooks_env
+		source hooks_env/bin/activate
+		python3 -m pip install --upgrade pip --quiet
+		pip install pytest flake8 flake8-bugbear pep8-naming flake8-builtins flake8-functions-names flake8-variables-names pep8-naming pylint mypy --quiet
+		echo "hooks_env" >> .gitignore
+		echo ".gitignore" >> .gitignore
+	else
+		source hooks_env/bin/activate
+	fi
+
+	echo "$(tput setab 7 setaf 1)>>>>     Code quality checks     <<<<$(tput sgr 0)"
+	echo ">>>>  flake8 check"
+	flake8 $FILE
+    flake8 $FILE_FASTQ
+	echo ">>>>  pylint check"
+	pylint $FILE
+    pylint $FILE_FASTQ
+	echo ">>>>  mypy check"
+	mypy $FILE
+    mypy $FILE_FASTQ
+
+	deactivate
+
+else
+
+	echo "Seems no python code to be checked. You can configure me in .git/hook/pre-commit"
+
+fi
