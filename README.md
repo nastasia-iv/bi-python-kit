@@ -23,6 +23,6 @@ Below is a brief description of the module:
   #### `RandomForestClassifierCustom`  
   Class for custom implementation of a Random Forest classifier. Uses thread parallelization to get results faster.  
 ### 🌿 test_script_pytest.py  
-A set of tests using the paytest library that check the correct execution of some module functions.  
+A set of tests using the `pytest` library that check the correct execution of some module functions.  
 ### 🌿 Showcases.ipynb
 Contains selected examples of how this module works.
