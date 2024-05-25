@@ -16,13 +16,13 @@ Below is a brief description of the module:
     
 ### 🌿 [bio_file_processor.py](bio_file_processor.py)    
 
-  #### `convert_multiline_fasta_to_oneline`  
+  * #### `convert_multiline_fasta_to_oneline`  
   Function for conversion of multi-line FASTA sequences to single-line sequences.  
   
-  #### `select_genes_from_gbk_to_fasta`  
+  * #### `select_genes_from_gbk_to_fasta`  
   Function that selects neighbor genes for the gene of interest from the GBK file and writes their protein sequences into FASTA format.  
   
-  #### `OpenFasta`  
+  * #### `OpenFasta`  
   Context manager for reading FASTA files.  
     
 ### 🌿 [custom_random_forest.py](custom_random_forest.py)    
