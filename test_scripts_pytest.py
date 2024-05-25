@@ -2,6 +2,7 @@ import os
 
 import pytest
 from Bio.Seq import Seq
+
 from bio_files_processor import (convert_multiline_fasta_to_oneline,
                                  FastaRecord, OpenFasta)
 from bi_python_kit import (calculate_gc_content, DNASequence,
