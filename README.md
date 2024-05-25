@@ -5,13 +5,13 @@ This repository contains homeworks completed as part of the Python course during
 Below is a brief description of the module:  
   
 ### 🌿 [bi_python_kit.py](bi_python_kit.py)   
-  #### `filter_fastq`  
+  * #### `filter_fastq`  
   Biopython-based FASTQ records filter working according to the specified criteria.  
-  #### `BiologicalSequence`  
+  * #### `BiologicalSequence`  
   OOP-based class that allows to perform simple operations with biological sequences (DNA, RNA, amino acid sequences).  
-  #### `telegram_logger`
+  * #### `telegram_logger`
   Decorator for logging function execution and sending logs to Telegram bot. It is written without using libraries that automate the creation of a Telegram bot.
-  #### `GenscanOutput`  
+  * #### `GenscanOutput`  
   Python API for http://hollywood.mit.edu/GENSCAN.html. Represents the output of the GENSCAN prediction.  
     
 ### 🌿 [bio_file_processor.py](bio_file_processor.py)    
@@ -26,7 +26,7 @@ Below is a brief description of the module:
   Context manager for reading FASTA files.  
     
 ### 🌿 [custom_random_forest.py](custom_random_forest.py)    
-  #### `RandomForestClassifierCustom`  
+  * #### `RandomForestClassifierCustom`  
   Class for custom implementation of a Random Forest classifier. It uses thread parallelization to get results faster.  
     
 ### 🌿 [test_script_pytest.py](test_script_pytest.py)    
