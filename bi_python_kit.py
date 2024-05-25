@@ -14,6 +14,195 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+class SequenceError(ValueError):
+    """
+    Exception raised for invalid nucleic acid sequences.
+    """
+
+    def __init__(self, message="Operation cannot be performed: incorrect sequence."):
+        self.message = message
+        super().__init__(self.message)
+
+
+class BiologicalSequence(ABC):
+    """
+    Abstract class for a biological sequence.
+    """
+
+    @abstractmethod
+    def __len__(self) -> int:
+        pass
+
+    @abstractmethod
+    def __getitem__(self, index) -> str:
+        pass
+
+    @abstractmethod
+    def __str__(self) -> str:
+        pass
+
+    @abstractmethod
+    def alphabet_is_valid(self) -> bool:
+        """
+        Check if the sequence's alphabet is valid.
+
+        Arguments:
+            self: the sequence object to check
+
+        Returns:
+            bool: True if the sequence contains valid characters, False otherwise.
+        """
+        pass
+
+
+class NucleicAcidSequence(BiologicalSequence):
+    """
+    Class for a nucleic acid sequence.
+    Created only to set methods of DNASequence and RNASequence classes.
+    """
+
+    def __init__(self, sequence: str):
+        self.sequence = sequence
+
+    def __len__(self) -> int:
+        return len(self.sequence)
+
+    def __getitem__(self, index) -> str:
+        return self.sequence[index]
+
+    def __str__(self) -> str:
+        return self.sequence
+
+    def alphabet_is_valid(self) -> bool:
+        """
+        Check if the sequence's alphabet is valid.
+
+        Returns:
+            bool: True if the sequence contains valid characters, False otherwise.
+        """
+        return all(nucleotide in self.alphabet for nucleotide in self.sequence)
+
+    def complement(self) -> Type['BiologicalSequence']:
+        """
+        Generate the complementary sequence.
+
+        Returns:
+            Type['BiologicalSequence']: Complementary sequence.
+        """
+        if not self.alphabet_is_valid():
+            raise SequenceError()
+
+        complement_pairs_dna = {
+            'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G',
+            'a': 't', 't': 'a', 'g': 'c', 'c': 'g'
+        }
+        complement_pairs_rna = {
+            'G': 'C', 'C': 'G', 'U': 'A', 'A': 'U',
+            'g': 'c', 'c': 'g', 'u': 'a', 'a': 'u'
+        }
+
+        complement_sequence = ''
+        complement_pairs = complement_pairs_dna if isinstance(self, DNASequence) else complement_pairs_rna
+
+        for base in self.sequence:
+            complement_sequence += complement_pairs.get(base, base)
+        return type(self)(complement_sequence)
+
+    def gc_content(self) -> float:
+        """
+        Calculate the GC content of the sequence.
+
+        Returns:
+            float: GC content as a percent.
+        """
+        if not self.alphabet_is_valid():
+            raise SequenceError()
+        return (sum(nucleotide in "CcGg" for nucleotide in self.sequence) / len(self)) * 100
+
+
+class DNASequence(NucleicAcidSequence):
+    """
+    Class for a DNA sequence.
+    """
+    alphabet = "ATGCatgc"
+
+    def __init__(self, sequence: str):
+        self.sequence = sequence
+
+    def transcribe(self) -> 'RNASequence':
+        """
+        Transcribe the DNA sequence into an RNA sequence.
+
+        Returns:
+            RNASequence: Transcribed RNA sequence.
+        """
+        if self.alphabet_is_valid():
+
+            transcribe_sequence = ''
+            for base in self.sequence:
+                if base == 'T':
+                    transcribe_sequence += 'U'
+                elif base == 't':
+                    transcribe_sequence += 'u'
+                else:
+                    transcribe_sequence += base
+            return RNASequence(transcribe_sequence)
+
+        raise SequenceError()
+
+
+class RNASequence(NucleicAcidSequence):
+    """
+    Class for an RNA sequence.
+    """
+    alphabet = "AUGCaugc"
+
+    def __init__(self, sequence: str):
+        self.sequence = sequence
+
+
+class AminoAcidSequence(BiologicalSequence):
+    """
+    Class for an amino acid sequence.
+    """
+    amino_acid_weights = {
+        'G': 57.051, 'A': 71.078, 'S': 87.077, 'P': 97.115, 'V': 99.131,
+        'T': 101.104, 'C': 103.143, 'I': 113.158, 'L': 113.158, 'N': 114.103,
+        'D': 115.087, 'Q': 128.129, 'K': 128.172, 'E': 129.114, 'M': 131.196,
+        'H': 137.139, 'F': 147.174, 'R': 156.186, 'Y': 163.173, 'W': 186.210
+    }
+
+    def __init__(self, sequence: str):
+        self.sequence = sequence
+
+    def __len__(self) -> int:
+        return len(self.sequence)
+
+    def __getitem__(self, index) -> str:
+        return self.sequence[index]
+
+    def __str__(self) -> str:
+        return self.sequence
+
+    def alphabet_is_valid(self) -> bool:
+        """
+        Check if the amino acid sequence's alphabet is valid.
+
+        Returns:
+            bool: True if the sequence contains valid characters, False otherwise.
+        """
+        amino_acid_alphabet = set("ARNDCHGQEILKMPSYTWFV")
+        return set(self.sequence).issubset(amino_acid_alphabet)
+
+    def calculate_molecular_weight(self) -> float:
+        """
+        Calculate the molecular weight of the amino acid sequence.
+
+        Returns:
+            float: Molecular weight of the sequence.
+        """
+        return sum(self.amino_acid_weights[aa] for aa in self.sequence)
+
 
 def calculate_gc_content(seq: Seq) -> float:
     """
@@ -116,200 +305,6 @@ def filter_fastq(input_path: str,
             filtered_records.append(record)
 
     return save_records_to_fastq(filtered_records, output_filename, input_path)
-
-
-class SequenceError(ValueError):
-    """
-    Exception raised for invalid nucleic acid sequences.
-    """
-
-    def __init__(self, message="Operation cannot be performed: incorrect sequence."):
-        self.message = message
-        super().__init__(self.message)
-
-
-class BiologicalSequence(ABC):
-    """
-    Abstract class for a biological sequence.
-    """
-
-    @abstractmethod
-    def __len__(self) -> int:
-        pass
-
-    @abstractmethod
-    def __getitem__(self, index) -> str:
-        pass
-
-    @abstractmethod
-    def __str__(self) -> str:
-        pass
-
-    @abstractmethod
-    def alphabet_is_valid(self) -> bool:
-        """
-        Check if the sequence's alphabet is valid.
-
-        Arguments:
-            self: the sequence object to check
-
-        Returns:
-            bool: True if the sequence contains valid characters, False otherwise.
-        """
-        pass
-
-
-class NucleicAcidSequence(BiologicalSequence):
-    """
-    Class for a nucleic acid sequence.
-    Created only to set methods of DNASequence and RNASequence classes.
-    """
-
-    def __init__(self, sequence: str):
-        self.sequence = sequence
-
-    def __len__(self) -> int:
-        return len(self.sequence)
-
-    def __getitem__(self, index) -> str:
-        return self.sequence[index]
-
-    def __str__(self) -> str:
-        return self.sequence
-
-    def alphabet_is_valid(self) -> bool:
-        """
-        Check if the sequence's alphabet is valid.
-
-        Returns:
-            bool: True if the sequence contains valid characters, False otherwise.
-        """
-        return all(nucleotide in self.alphabet for nucleotide in self.sequence)
-
-    def complement(self) -> Type['BiologicalSequence']:
-        """
-        Generate the complementary sequence.
-
-        Returns:
-            Type['BiologicalSequence']: Complementary sequence.
-        """
-        if self.alphabet_is_valid():
-
-            complement_pairs_dna = {
-                'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G',
-                'a': 't', 't': 'a', 'g': 'c', 'c': 'g'
-            }
-            complement_pairs_rna = {
-                'G': 'C', 'C': 'G', 'U': 'A', 'A': 'U',
-                'g': 'c', 'c': 'g', 'u': 'a', 'a': 'u'
-            }
-
-            complement_sequence = ''
-            complement_pairs = complement_pairs_dna if isinstance(self, DNASequence) else complement_pairs_rna
-
-            for base in self.sequence:
-                complement_sequence += complement_pairs.get(base, base)
-
-            return type(self)(complement_sequence)
-
-        raise SequenceError()
-
-    def gc_content(self) -> float:
-        """
-        Calculate the GC content of the sequence.
-
-        Returns:
-            float: GC content as a percent.
-        """
-        if self.alphabet_is_valid():
-
-            return (sum(nucleotide in "CcGg" for nucleotide in self.sequence) / len(self)) * 100
-
-        raise SequenceError()
-
-
-class DNASequence(NucleicAcidSequence):
-    """
-    Class for a DNA sequence.
-    """
-    alphabet = "ATGCatgc"
-
-    def __init__(self, sequence: str):
-        self.sequence = sequence
-
-    def transcribe(self) -> 'RNASequence':
-        """
-        Transcribe the DNA sequence into an RNA sequence.
-
-        Returns:
-            RNASequence: Transcribed RNA sequence.
-        """
-        if self.alphabet_is_valid():
-
-            transcribe_sequence = ''
-            for base in self.sequence:
-                if base == 'T':
-                    transcribe_sequence += 'U'
-                elif base == 't':
-                    transcribe_sequence += 'u'
-                else:
-                    transcribe_sequence += base
-            return RNASequence(transcribe_sequence)
-
-        raise SequenceError()
-
-
-class RNASequence(NucleicAcidSequence):
-    """
-    Class for an RNA sequence.
-    """
-    alphabet = "AUGCaugc"
-
-    def __init__(self, sequence: str):
-        self.sequence = sequence
-
-
-class AminoAcidSequence(BiologicalSequence):
-    """
-    Class for an amino acid sequence.
-    """
-    amino_acid_weights = {
-        'G': 57.051, 'A': 71.078, 'S': 87.077, 'P': 97.115, 'V': 99.131,
-        'T': 101.104, 'C': 103.143, 'I': 113.158, 'L': 113.158, 'N': 114.103,
-        'D': 115.087, 'Q': 128.129, 'K': 128.172, 'E': 129.114, 'M': 131.196,
-        'H': 137.139, 'F': 147.174, 'R': 156.186, 'Y': 163.173, 'W': 186.210
-    }
-
-    def __init__(self, sequence: str):
-        self.sequence = sequence
-
-    def __len__(self) -> int:
-        return len(self.sequence)
-
-    def __getitem__(self, index) -> str:
-        return self.sequence[index]
-
-    def __str__(self) -> str:
-        return self.sequence
-
-    def alphabet_is_valid(self) -> bool:
-        """
-        Check if the amino acid sequence's alphabet is valid.
-
-        Returns:
-            bool: True if the sequence contains valid characters, False otherwise.
-        """
-        amino_acid_alphabet = set("ARNDCHGQEILKMPSYTWFV")
-        return set(self.sequence).issubset(amino_acid_alphabet)
-
-    def calculate_molecular_weight(self) -> float:
-        """
-        Calculate the molecular weight of the amino acid sequence.
-
-        Returns:
-            float: Molecular weight of the sequence.
-        """
-        return sum(self.amino_acid_weights[aa] for aa in self.sequence)
 
 
 def format_time(timedelta: datetime.timedelta) -> str:
