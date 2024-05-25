@@ -15,10 +15,13 @@ Below is a brief description of the module:
   Python API for http://hollywood.mit.edu/GENSCAN.html. Represents the output of the GENSCAN prediction.  
     
 ### 🌿 [bio_file_processor.py](bio_file_processor.py)    
+
   #### `convert_multiline_fasta_to_oneline`  
   Function for conversion of multi-line FASTA sequences to single-line sequences.  
+  
   #### `select_genes_from_gbk_to_fasta`  
   Function that selects neighbor genes for the gene of interest from the GBK file and writes their protein sequences into FASTA format.  
+  
   #### `OpenFasta`  
   Context manager for reading FASTA files.  
     
