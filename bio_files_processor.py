@@ -2,6 +2,87 @@ from dataclasses import dataclass
 from typing import Iterator, List, Tuple
 
 
+@dataclass
+class FastaRecord:
+    """
+    Dataclass for a FASTA record.
+
+    Attributes:
+        id (str): Sequence identifier.
+        description (str): Description of the sequence.
+        seq (str): Biological sequence.
+    """
+    seq_id: str
+    description: str
+    seq: str
+
+    def __repr__(self) -> str:
+        return f"{self.seq_id} {self.description}\n{self.seq}"
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, FastaRecord):
+            return False
+        return self.seq_id == other.seq_id and self.description == other.description and self.seq == other.seq
+
+
+class OpenFasta:
+    """
+    Context manager for reading FASTA files.
+    """
+    def __init__(self, fasta_file: str, mode: str = 'r'):
+        self.file = fasta_file
+        self.mode = mode
+        self.handler = None
+        self.line = None
+
+    def __enter__(self) -> 'OpenFasta':
+        self.handler = open(self.file, self.mode)
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        self.handler.close()
+
+    def __iter__(self) -> Iterator[FastaRecord]:
+        return self
+
+    def read_record(self) -> FastaRecord:
+        """
+        Read the next FASTA record.
+
+        Returns:
+            FastaRecord: The next FASTA record.
+        """
+        return next(self)
+
+    def read_records(self) -> List[FastaRecord]:
+        """
+        Read all FASTA records.
+
+        Returns:
+            Iterator[FastaRecord]: An iterator over all FASTA records.
+        """
+        records = []
+        for record in self:
+            records.append(record)
+        return records
+
+    def __next__(self) -> FastaRecord:
+        if self.line is None:
+            self.line = self.handler.readline().strip()
+        if self.line == '':
+            raise StopIteration
+
+        seq_id, desc = self.line.split(' ', 1)
+
+        seq = ''
+        self.line = self.handler.readline().strip()
+        while (not self.line.startswith('>')) and (self.line != ''):
+            seq = seq + self.line
+            self.line = self.handler.readline().strip()
+
+        return FastaRecord(seq_id=seq_id, description=desc, seq=seq)
+
+
 def convert_multiline_fasta_to_oneline(input_fasta: str,
                                        output_fasta: str = '') -> None:
     """
@@ -110,79 +191,3 @@ def select_genes_from_gbk_to_fasta(input_gbk: str,
         for gene_and_translation in neighbor_gene_proteins:
             gene, translation = gene_and_translation  # unpack the list into tuples
             output_file.write(f">{gene}\n{translation}\n")
-
-
-@dataclass
-class FastaRecord:
-    """
-    Dataclass for a FASTA record.
-
-    Attributes:
-        id (str): Sequence identifier.
-        description (str): Description of the sequence.
-        seq (str): Biological sequence.
-    """
-    seq_id: str
-    description: str
-    seq: str
-
-    def __repr__(self) -> str:
-        return f"{self.seq_id} {self.description}\n{self.seq}"
-
-
-class OpenFasta:
-    """
-    Context manager for reading FASTA files.
-    """
-    def __init__(self, fasta_file: str, mode: str = 'r'):
-        self.file = fasta_file
-        self.mode = mode
-        self.handler = None
-        self.line = None
-
-    def __enter__(self) -> 'OpenFasta':
-        self.handler = open(self.file, self.mode)
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
-        self.handler.close()
-
-    def __iter__(self) -> Iterator[FastaRecord]:
-        return self
-
-    def read_record(self) -> FastaRecord:
-        """
-        Read the next FASTA record.
-
-        Returns:
-            FastaRecord: The next FASTA record.
-        """
-        return next(self)
-
-    def read_records(self) -> List[FastaRecord]:
-        """
-        Read all FASTA records.
-
-        Returns:
-            Iterator[FastaRecord]: An iterator over all FASTA records.
-        """
-        records = []
-        for record in self:
-            records.append(record)
-        return records
-
-    def __next__(self) -> FastaRecord:
-        if self.line is None:
-            self.line = self.handler.readline().strip()
-        if self.line == '':
-            raise StopIteration
-
-        seq_id, desc = self.line.split(' ', 1)
-
-        seq = ''
-        self.line = self.handler.readline().strip()
-        while (not self.line.startswith('>')) and (self.line != ''):
-            seq = seq + self.line
-            self.line = self.handler.readline().strip()
-
-        return FastaRecord(seq_id=seq_id, description=desc, seq=seq)
