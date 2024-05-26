@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class SequenceError(ValueError):
     """
     Exception raised for invalid nucleic acid sequences.
