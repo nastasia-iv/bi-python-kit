@@ -1,6 +1,6 @@
 This repository contains homeworks completed as part of the Python course during the annual retraining program at the Bioinformatics Institute (2023/2024). The required third-party dependencies are listed in the [requirements.txt](requirements.txt).  
   
-*Topics covered*: basic and advanced Python syntax, functions, working with files, OOP, API and web page parsing, and code testing.  
+*Topics covered*: basic and advanced Python syntax, functions, working with files, OOP, API and web page parsing, code testing.  
   
 Below is a brief description of the module:  
   
