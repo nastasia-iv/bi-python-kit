@@ -72,13 +72,8 @@ class TestFastaFunctions:
         with OpenFasta(input_fasta) as fasta_reader:
             records = fasta_reader.read_records()
         assert len(records) == 2
-        assert isinstance(records[0], FastaRecord)
-        assert records[0].seq_id == ">seq1"
-        assert records[0].description == "Descr1"
-        assert records[0].seq == "ATCG"
-        assert records[1].seq_id == ">seq2"
-        assert records[1].description == "Descr2"
-        assert records[1].seq == "GCTA"
+        assert records[0] == FastaRecord(seq_id=">seq1", description="Descr1", seq="ATCG")
+        assert records[1] == FastaRecord(seq_id=">seq2", description="Descr2", seq="GCTA")
 
 
 class TestGenscanFunctions:
