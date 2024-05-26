@@ -61,12 +61,15 @@ class TestFastaFunctions:
     def test_convert_multiline_fasta_to_oneline(self, input_fasta, output_fasta):
         convert_multiline_fasta_to_oneline(input_fasta, output_fasta)
         assert os.path.exists(output_fasta)
+        expected_output = [
+            ">seq1 Descr1\n",
+            "ATCGCCTG\n",
+            ">seq2 Descr2\n",
+            "GCTACGAT\n"
+        ]
         with open(output_fasta, "r") as f:
             lines = f.readlines()
-            assert ">seq1 Descr1\n" in lines
-            assert "ATCGCCTG\n" in lines
-            assert ">seq2 Descr2\n" in lines
-            assert "GCTACGAT" in lines
+            assert lines == expected_output
 
     def test_open_fasta_reading(self, input_fasta):
         with OpenFasta(input_fasta) as fasta_reader:
